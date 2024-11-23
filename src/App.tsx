@@ -1,26 +1,56 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import SignIn from "./sign-in/SignIn";
+import SignUp from "./sign-up/signUp";
+import CustomerDashboard from "./dashboards/CustomerDashboard";
+import VendorDashboard from "./dashboards/VendorDashboard";
 
-function App() {
+const getUser = () => {
+  const user = localStorage.getItem("user");
+  return user ? JSON.parse(user) : null;
+};
+
+const ProtectedRoute = ({ children, role }: { children: React.ReactNode; role: string }) => {
+  const user = getUser();
+
+  if (!user || user.role !== role) {
+    return <Navigate to="/sign-in" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        {/* Authentication Routes */}
+        <Route path="/sign-in" element={<SignIn />} />
+        <Route path="/sign-up" element={<SignUp />} />
+
+        {/* Role-Based Protected Routes */}
+        <Route
+          path="/customer-dashboard"
+          element={
+            <ProtectedRoute role="CUSTOMER">
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vendor-dashboard"
+          element={
+            <ProtectedRoute role="VENDOR">
+              <VendorDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default Redirect */}
+        <Route path="*" element={<Navigate to="/sign-in" replace />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;

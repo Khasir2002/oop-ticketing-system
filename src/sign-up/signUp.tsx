@@ -1,0 +1,261 @@
+import React from 'react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import Divider from '@mui/material/Divider';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import FormLabel from '@mui/material/FormLabel';
+import Link from '@mui/material/Link';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import MenuItem from '@mui/material/MenuItem';
+import Stack from '@mui/material/Stack';
+import MuiCard from '@mui/material/Card';
+import { styled } from '@mui/material/styles';
+import AppTheme from '../theme/AppTheme';
+import { BookOnline } from '@mui/icons-material';
+import axios from 'axios';
+
+const Card = styled(MuiCard)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignSelf: 'center',
+  width: '100%',
+  padding: theme.spacing(4),
+  gap: theme.spacing(2),
+  margin: 'auto',
+  [theme.breakpoints.up('sm')]: {
+    width: '450px',
+  },
+  boxShadow:
+    'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
+  ...theme.applyStyles('dark', {
+    boxShadow:
+      'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
+  }),
+}));
+
+const SignUpContainer = styled(Stack)(({ theme }) => ({
+  height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
+  minHeight: '100%',
+  padding: theme.spacing(2),
+  [theme.breakpoints.up('sm')]: {
+    padding: theme.spacing(4),
+  },
+  '&::before': {
+    content: '""',
+    display: 'block',
+    position: 'absolute',
+    zIndex: -1,
+    inset: 0,
+    backgroundImage:
+      'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
+    backgroundRepeat: 'no-repeat',
+    ...theme.applyStyles('dark', {
+      backgroundImage:
+        'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
+    }),
+  },
+}));
+
+export default function SignUp(props: { disableCustomTheme?: boolean }) {
+  const [emailError, setEmailError] = React.useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
+  const [passwordError, setPasswordError] = React.useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
+  const [nameError, setNameError] = React.useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+  const [role, setRole] = React.useState('CUSTOMER'); // Default role
+
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false); // Snackbar visibility
+  const [snackbarMessage, setSnackbarMessage] = React.useState(''); // Snackbar message
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<'success' | 'error'>('success'); // Snackbar type
+
+  const handleSnackbarClose = () => setSnackbarOpen(false);
+
+  const validateInputs = () => {
+    const email = document.getElementById('email') as HTMLInputElement;
+    const password = document.getElementById('password') as HTMLInputElement;
+    const name = document.getElementById('name') as HTMLInputElement;
+
+    let isValid = true;
+
+    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+      setEmailError(true);
+      setEmailErrorMessage('Please enter a valid email address.');
+      isValid = false;
+    } else {
+      setEmailError(false);
+      setEmailErrorMessage('');
+    }
+
+    if (!password.value || password.value.length < 6) {
+      setPasswordError(true);
+      setPasswordErrorMessage('Password must be at least 6 characters long.');
+      isValid = false;
+    } else {
+      setPasswordError(false);
+      setPasswordErrorMessage('');
+    }
+
+    if (!name.value || name.value.length < 1) {
+      setNameError(true);
+      setNameErrorMessage('Name is required.');
+      isValid = false;
+    } else {
+      setNameError(false);
+      setNameErrorMessage('');
+    }
+
+    return isValid;
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!validateInputs()) {
+      return;
+    }
+
+    const data = new FormData(event.currentTarget);
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/v1/auth/register', {
+        name: data.get('name'),
+        email: data.get('email'),
+        password: data.get('password'),
+        role: role, // Use the selected role
+      });
+
+      console.log('Registration successful:', response.data);
+      setSnackbarMessage('Registration successful! You can now log in.');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      setTimeout(() => {
+        window.location.href = '/sign-in';
+      }, 2000); // Redirect after showing the Snackbar
+    } catch (error) {
+      console.error('Registration failed:', error);
+      setSnackbarMessage('Registration failed. Please try again.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRole(event.target.value);
+  };
+
+  return (
+    <AppTheme {...props}>
+      <CssBaseline enableColorScheme />
+      <SignUpContainer direction="column" justifyContent="space-between">
+        <Card variant="outlined">
+          <BookOnline />
+          <Typography
+            component="h1"
+            variant="h4"
+            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+          >
+            Sign up
+          </Typography>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+          >
+            <FormControl>
+              <FormLabel htmlFor="name">Full name</FormLabel>
+              <TextField
+                autoComplete="name"
+                name="name"
+                required
+                fullWidth
+                id="name"
+                placeholder="Jon Snow"
+                error={nameError}
+                helperText={nameErrorMessage}
+                color={nameError ? 'error' : 'primary'}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="email">Email</FormLabel>
+              <TextField
+                required
+                fullWidth
+                id="email"
+                placeholder="your@email.com"
+                name="email"
+                autoComplete="email"
+                variant="outlined"
+                error={emailError}
+                helperText={emailErrorMessage}
+                color={emailError ? 'error' : 'primary'}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="password">Password</FormLabel>
+              <TextField
+                required
+                fullWidth
+                name="password"
+                placeholder="••••••"
+                type="password"
+                id="password"
+                autoComplete="new-password"
+                variant="outlined"
+                error={passwordError}
+                helperText={passwordErrorMessage}
+                color={passwordError ? 'error' : 'primary'}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="role">Role</FormLabel>
+              <TextField
+                select
+                id="role"
+                name="role"
+                required
+                fullWidth
+                value={role}
+                onChange={handleRoleChange}
+              >
+                <MenuItem value="CUSTOMER">Customer</MenuItem>
+                <MenuItem value="VENDOR">Vendor</MenuItem>
+              </TextField>
+            </FormControl>
+            <Button type="submit" fullWidth variant="contained">
+              Sign up
+            </Button>
+          </Box>
+          <Divider>
+            <Typography sx={{ color: 'text.secondary' }}>or</Typography>
+          </Divider>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Typography sx={{ textAlign: 'center' }}>
+              Already have an account?{' '}
+              <Link href="/sign-in" variant="body2" sx={{ alignSelf: 'center' }}>
+                Sign in
+              </Link>
+            </Typography>
+          </Box>
+        </Card>
+
+        {/* Snackbar for alerts */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={5000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </SignUpContainer>
+    </AppTheme>
+  );
+}
