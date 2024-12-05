@@ -5,9 +5,6 @@ import {
   Typography,
   Grid,
   Card,
-  CardContent,
-  CardMedia,
-  Button,
 } from "@mui/material";
 import {
   Dashboard,
@@ -17,9 +14,8 @@ import {
   AddCircle,
   Inventory,
   AccountCircle,
-  DeleteForeverOutlined,
-  LocationOn,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import SideNavBar from "../common/SideNavBar";
 import MetricCard from "../common/MetricCard";
 import axios from "axios";
@@ -28,6 +24,8 @@ import EventCardList from "./EventCardList";
 
 const EventDashboard: React.FC = () => {
   const [activeItem, setActiveItem] = useState("Dashboard");
+  const navigate = useNavigate();
+  const [username, setUsername] = useState<string | null>(null);  // State for username
 
   interface Event {
     description: string;
@@ -60,17 +58,16 @@ const EventDashboard: React.FC = () => {
       ],
     },
     { name: "Tickets Log", icon: <Inventory /> },
-    {
-      name: "Profile",
-      icon: <AccountCircle />,
-      subItems: [
-        { name: "Logout", icon: <AccountCircle /> },
-        { name: "Deactivate Account", icon: <DeleteForeverOutlined /> },
-      ],
-    },
   ];
-
   useEffect(() => {
+    // Retrieve username from localStorage if available
+    const user = localStorage.getItem("user");
+    console.log(user);
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      setUsername(parsedUser.name);
+    }
+    
     fetchEvents();
   }, []);
 
@@ -117,6 +114,11 @@ const EventDashboard: React.FC = () => {
           menuItems={menuItems}
           onMenuSelect={setActiveItem}
           activeItem={activeItem}
+          username={username}
+          onLogout={() => {
+            localStorage.removeItem("user");
+            navigate("/login");
+          }}
         />
 
         {/* Main Content */}
@@ -247,9 +249,7 @@ const EventDashboard: React.FC = () => {
           )}
 
           {activeItem === "Create Event" && <EventCreation />}
-          {activeItem === "Active Events" && (
-            <EventCardList/>          
-          )}
+          {activeItem === "Active Events" && <EventCardList role="vendor" />}
         </Box>
       </Box>
     </>

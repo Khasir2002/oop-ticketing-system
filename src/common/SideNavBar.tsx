@@ -5,8 +5,11 @@ import {
   ChevronRight,
   ExpandLess,
   ExpandMore,
+  AccountCircle,
+  Logout,
+  DeleteForever,
 } from "@mui/icons-material";
-
+import { useNavigate } from "react-router-dom"; 
 interface MenuItem {
   name: string;
   icon: React.ReactNode;
@@ -17,16 +20,18 @@ interface SideNavBarProps {
   menuItems: MenuItem[];
   onMenuSelect: (menuItem: string) => void;
   activeItem: string;
+  username: string | null;
+  onLogout: () => void; 
 }
 
 const SideNavBar: React.FC<SideNavBarProps> = ({
   menuItems,
   onMenuSelect,
   activeItem,
+  username, // Get username here
+  onLogout, // Get logout handler
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  // Initialize `openSubMenus` with the expanded status for the "Events" menu
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>(() =>
     menuItems.reduce((acc, item) => {
       if (item.name === "Events") {
@@ -36,6 +41,8 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
     }, {} as Record<string, boolean>)
   );
 
+  const navigate = useNavigate(); // Initialize useNavigate
+
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
   const handleSubMenuToggle = (menuName: string) => {
@@ -43,6 +50,18 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
       ...prev,
       [menuName]: !prev[menuName],
     }));
+  };
+
+  const handleLogout = () => {
+    // Clear user data from localStorage and redirect to sign-in page
+    localStorage.removeItem("user");
+    onLogout(); // Invoke the passed logout function if needed
+    navigate("/sign-in"); // Redirect to sign-in page
+  };
+
+  const handleDeactivateAccount = () => {
+    // Placeholder for deactivating the account (you can add API call here)
+    alert("Account deactivation is not implemented yet.");
   };
 
   return (
@@ -58,13 +77,7 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
         },
       }}
     >
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        px={2}
-        py={2}
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center" px={2} py={2}>
         {!isSidebarCollapsed && (
           <Typography variant="h5" sx={{ fontWeight: "bold", color: "#fff" }}>
             TicketJet
@@ -76,6 +89,7 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
           <ChevronLeft onClick={toggleSidebar} sx={{ color: "#fff" }} />
         )}
       </Box>
+
       <Box mt={2}>
         {menuItems.map((item) => (
           <React.Fragment key={item.name}>
@@ -100,11 +114,7 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
                 (openSubMenus[item.name] ? <ExpandLess /> : <ExpandMore />)}
             </Button>
             {item.subItems && (
-              <Collapse
-                in={openSubMenus[item.name]}
-                timeout="auto"
-                unmountOnExit
-              >
+              <Collapse in={openSubMenus[item.name]} timeout="auto" unmountOnExit>
                 {item.subItems.map((subItem) => (
                   <Button
                     key={subItem.name}
@@ -117,8 +127,7 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
                       textTransform: "none",
                       paddingLeft: isSidebarCollapsed ? 0 : 4,
                       fontWeight: activeItem === subItem.name ? "bold" : "medium",
-                      backgroundColor:
-                        activeItem === subItem.name ? "#1e3a8a" : undefined,
+                      backgroundColor: activeItem === subItem.name ? "#1e3a8a" : undefined,
                     }}
                   >
                     {!isSidebarCollapsed && subItem.name}
@@ -128,6 +137,56 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
             )}
           </React.Fragment>
         ))}
+      </Box>
+
+      {/* Profile Section at the bottom */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 0,
+          width: "100%",
+          padding: 2,
+          textAlign: "center",
+          bgcolor: "#082444",
+          borderTop: "1px solid #1e3a8a",
+        }}
+      >
+        <Button
+          startIcon={<AccountCircle />}
+          fullWidth
+          sx={{
+            color: "white",
+            justifyContent: isSidebarCollapsed ? "center" : "flex-start",
+            textTransform: "none",
+          }}
+        >
+          {!isSidebarCollapsed && username ? `${username}` : "Profile"}
+        </Button>
+        <Button
+          startIcon={<Logout />}
+          onClick={handleLogout}
+          fullWidth
+          sx={{
+            justifyContent: isSidebarCollapsed ? "center" : "flex-start",
+            textTransform: "none",
+            fontWeight: "bold", 
+          }}
+        >
+          {!isSidebarCollapsed && "Logout"}
+        </Button>
+        <Button
+          startIcon={<DeleteForever />}
+          onClick={handleDeactivateAccount}
+          fullWidth
+          sx={{
+            color: "#f44336",
+            justifyContent: isSidebarCollapsed ? "center" : "flex-start",
+            textTransform: "none",
+            fontWeight: "bold",
+          }}
+        >
+          {!isSidebarCollapsed && "Deactivate Account"}
+        </Button>
       </Box>
     </Drawer>
   );

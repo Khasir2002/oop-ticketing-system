@@ -4,6 +4,7 @@ import SignIn from "./sign-in/SignIn";
 import SignUp from "./sign-up/signUp";
 import CustomerDashboard from "./dashboards/CustomerDashboard";
 import VendorDashboard from "./dashboards/VendorDashboard";
+import AppTheme from "./theme/AppTheme";
 
 const getUser = () => {
   const user = localStorage.getItem("user");
@@ -33,7 +34,9 @@ const App: React.FC = () => {
           path="/customer-dashboard"
           element={
             <ProtectedRoute role="CUSTOMER">
+              <AppTheme>
               <CustomerDashboard />
+              </AppTheme>
             </ProtectedRoute>
           }
         />

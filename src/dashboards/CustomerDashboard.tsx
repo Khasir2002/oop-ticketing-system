@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Card, CardContent, CardMedia, Grid, Typography } from "@mui/material";
 import Header from "../common/Header";
-import EventCard from "../common/EventCard";
 import SnackbarNotification from "../common/SnackBarNotification";
 import axios from "axios";
-import { CalendarToday, LocationOn } from "@mui/icons-material";
 import EventCardList from "./EventCardList";
-
-const randomImages: string | any[] = [
-  // Your random image URLs
-];
-
-const formatDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-};
+import Slider from "../common/Slider";
 
 const CustomerDashboard: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
@@ -38,7 +28,6 @@ const CustomerDashboard: React.FC = () => {
       const startedEvents = response.data.filter((event: { started: any }) => event.started);
       const eventsWithImages = startedEvents.map((event: any, index: number) => ({
         ...event,
-        image: randomImages[index % randomImages.length],
       }));
       setEvents(eventsWithImages);
     } catch (error) {
@@ -66,14 +55,15 @@ const CustomerDashboard: React.FC = () => {
   return (
     <Box>
       <Header />
+      <Slider />
       <Box sx={{ padding: 4 }}>
-        <Typography variant="h4" gutterBottom style={{ color: "#e0e1dd" }}>
-          Welcome to TicketJet
+        <Typography variant="h4" gutterBottom style={{ color: "#9fb3c8", textAlign: "center" }}>
+          Upcoming Events
         </Typography>
-        <Typography variant="body1" gutterBottom style={{ color: "#9fb3c8" }}>
+        <Typography variant="body1" gutterBottom style={{ color: "#9fb3c8", textAlign: "center" }}>
           Browse and purchase tickets for upcoming events.
         </Typography>
-        <EventCardList/>
+        <EventCardList role="customer" />
         <SnackbarNotification
           open={snackbarOpen}
           message={snackbarMessage}

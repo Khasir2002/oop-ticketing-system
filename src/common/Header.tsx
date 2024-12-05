@@ -1,95 +1,60 @@
-import React, { useState } from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { AppBar, Toolbar, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import logo from "../assets/logo.png";
 
+// Styled components for the AppBar and Buttons
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: "#ffffff",
   color: "#000000",
   boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
 }));
 
-const NavLink = styled(Button)(({ theme }) => ({
-  textTransform: "none",
-  fontWeight: "bold",
-  fontSize: "16px",
-  color: "#000000",
-  "&:hover": {
-    color: theme.palette.primary.main,
-  },
-}));
 
-const SignInButton = styled(Button)(({ theme }) => ({
-  textTransform: "none",
-  fontWeight: "bold",
-  backgroundColor: theme.palette.primary.main,
-  color: "#ffffff",
-  borderRadius: "20px",
-  padding: "5px 20px",
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-  },
-}));
+const LogoImage = styled("img")({
+  height: "60px",
+  width: "100px",
+  cursor: "pointer",
+  
+});
 
 const Header: React.FC = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem("user");
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+   
+    if (loggedInUser) {
+      try {
+        const user = JSON.parse(loggedInUser); 
+        setUserName(user.name || "");
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        setUserName("Guest");
+      }
+    } else {
+      setUserName("Guest");
+    }
+  }, []);
 
   return (
     <StyledAppBar position="static">
       <Toolbar sx={{ justifyContent: "space-between", padding: "0 20px" }}>
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{ fontWeight: "bold", color: "#0d6efd" }}
-        >
-          Ticket <span style={{ color: "#ffffff" }}>Jet</span>
-        </Typography>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          <NavLink onClick={handleMenuOpen} endIcon={<ArrowDropDownIcon />}>
-            Events
-          </NavLink>
-          <NavLink>Theater</NavLink>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <LogoImage src={logo} alt="Ticket Jet" />
         </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <Button sx={{ fontWeight: "bold", textTransform: "none" }}>
-            Register
-          </Button>
-          <SignInButton startIcon={<AccountCircleIcon />}>
-            Sign In
-          </SignInButton>
+        {/* Right side: Logged-in User Name */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          {userName ? (
+            <Typography sx={{ fontWeight: "bold", fontSize: "16px" }}>
+              Hello, {userName}!
+            </Typography>
+          ) : (
+            <Typography sx={{ fontWeight: "bold", fontSize: "16px" }}>
+              Please Log In
+            </Typography>
+          )}
         </Box>
-
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-          MenuListProps={{
-            "aria-labelledby": "basic-button",
-          }}
-        >
-          <MenuItem onClick={handleMenuClose}>Concerts</MenuItem>
-          <MenuItem onClick={handleMenuClose}>Festivals</MenuItem>
-          <MenuItem onClick={handleMenuClose}>Workshops</MenuItem>
-        </Menu>
       </Toolbar>
     </StyledAppBar>
   );
