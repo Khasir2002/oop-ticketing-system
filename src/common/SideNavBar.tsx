@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Drawer, Typography, Button, Collapse } from "@mui/material";
+import { Box, Drawer, Typography, Button, Collapse, Snackbar, Alert } from "@mui/material";
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,6 +10,8 @@ import {
   DeleteForever,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom"; 
+import axios from "axios";
+
 interface MenuItem {
   name: string;
   icon: React.ReactNode;
@@ -40,7 +42,11 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
       return acc;
     }, {} as Record<string, boolean>)
   );
-
+  
+  const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success'); // Set default severity as success
+  
   const navigate = useNavigate(); // Initialize useNavigate
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
@@ -56,12 +62,44 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
     // Clear user data from localStorage and redirect to sign-in page
     localStorage.removeItem("user");
     onLogout(); // Invoke the passed logout function if needed
-    navigate("/sign-in"); // Redirect to sign-in page
+    setSnackbarMessage("Logged out successfully.");
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true); // Open snackbar for successful logout
+    setTimeout(() => {
+      navigate("/sign-in"); // Redirect to sign-in page after showing message
+    }, 2000); // Wait for 2 seconds before redirecting
   };
 
-  const handleDeactivateAccount = () => {
-    // Placeholder for deactivating the account (you can add API call here)
-    alert("Account deactivation is not implemented yet.");
+  const handleDeactivateAccount = async () => {
+    try {
+      // Assuming you have the user ID from localStorage or props
+      const userId = localStorage.getItem("userId");
+      console.log("User ID:", userId);
+  
+      if (!userId) {
+        setSnackbarMessage("User not found!");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return;
+      }
+  
+      // Send delete request to the backend
+      const response = await axios.delete(`http://localhost:8080/api/v1/user/deleteUser/${userId}`);
+      if (response.status === 200) {
+        setSnackbarMessage("Account deactivated successfully.");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+        localStorage.removeItem("user");
+        setTimeout(() => {
+          navigate("/sign-in");  // Redirect to login page after successful deactivation
+        }, 2000); // Wait for 2 seconds before redirecting
+      }
+    } catch (error) {
+      console.error("Error deactivating account:", error);
+      setSnackbarMessage("There was an error deactivating your account. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
   };
 
   return (
@@ -188,6 +226,18 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
           {!isSidebarCollapsed && "Deactivate Account"}
         </Button>
       </Box>
+
+      {/* Snackbar Notification */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Drawer>
   );
 };

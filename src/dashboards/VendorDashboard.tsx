@@ -13,19 +13,18 @@ import {
   AttachMoney,
   AddCircle,
   Inventory,
-  AccountCircle,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import SideNavBar from "../common/SideNavBar";
 import MetricCard from "../common/MetricCard";
 import axios from "axios";
+import EventTable from "./EventTable";
 import EventCreation from "./EventCreation";
-import EventCardList from "./EventCardList";
 
 const EventDashboard: React.FC = () => {
   const [activeItem, setActiveItem] = useState("Dashboard");
   const navigate = useNavigate();
-  const [username, setUsername] = useState<string | null>(null);  // State for username
+  const [username, setUsername] = useState<string | null>(null);
 
   interface Event {
     description: string;
@@ -34,66 +33,46 @@ const EventDashboard: React.FC = () => {
     location: string;
     date: string;
     time: string;
-    totalTickets: string;
-    soldTickets: string;
+    totalTickets: number;
+    soldTickets: number;
     ticketPrice: number;
     started: boolean;
     completed: boolean;
     imageUrl: string;
   }
 
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>([]); // State to store event data
   const [totalTickets, setTotalTickets] = useState(0);
   const [ticketsSold, setTicketsSold] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
 
-  const menuItems = [
-    { name: "Dashboard", icon: <Dashboard /> },
-    {
-      name: "Events",
-      icon: <CalendarToday />,
-      subItems: [
-        { name: "Create Event", icon: <AddCircle /> },
-        { name: "Active Events", icon: <CheckCircle /> },
-      ],
-    },
-    { name: "Tickets Log", icon: <Inventory /> },
-  ];
   useEffect(() => {
-    // Retrieve username from localStorage if available
     const user = localStorage.getItem("user");
-    console.log(user);
     if (user) {
       const parsedUser = JSON.parse(user);
       setUsername(parsedUser.name);
     }
-    
+
     fetchEvents();
   }, []);
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/v1/events/getAllEvents"
-      );
+      const response = await axios.get("http://localhost:8080/api/v1/events/getAllEvents");
       const eventsData = response.data;
       setEvents(eventsData);
 
       const totalTickets = eventsData.reduce(
-        (total: number, event: { totalTickets: any }) =>
-          total + parseInt(event.totalTickets || "0"),
+        (total: number, event: { totalTickets: any }) => total + parseInt(event.totalTickets || "0"),
         0
       );
       const ticketsSold = eventsData.reduce(
-        (total: number, event: { soldTickets: any }) =>
-          total + parseInt(event.soldTickets || "0"),
+        (total: number, event: { soldTickets: any }) => total + parseInt(event.soldTickets || "0"),
         0
       );
       const totalRevenue = eventsData.reduce(
         (total: number, event: { soldTickets: any; ticketPrice: any }) =>
-          total +
-          parseFloat(event.soldTickets || "0") *
-            parseFloat(event.ticketPrice || "0"),
+          total + parseFloat(event.soldTickets || "0") * parseFloat(event.ticketPrice || "0"),
         0
       );
 
@@ -104,6 +83,19 @@ const EventDashboard: React.FC = () => {
       console.error("Error fetching events:", error);
     }
   };
+
+  const menuItems = [
+    { name: "Dashboard", icon: <Dashboard /> },
+    {
+      name: "Events",
+      icon: <CalendarToday />,
+      subItems: [
+        { name: "Create Event", icon: <AddCircle /> },
+        { name: "All Events", icon: <CheckCircle /> },
+      ],
+    },
+    { name: "Tickets Log", icon: <Inventory /> },
+  ];
 
   return (
     <>
@@ -172,6 +164,8 @@ const EventDashboard: React.FC = () => {
                   />
                 </Grid>
               </Grid>
+
+              {/* Event Progress Section */}
               <Box mt={4}>
                 <Typography
                   variant="h5"
@@ -249,7 +243,19 @@ const EventDashboard: React.FC = () => {
           )}
 
           {activeItem === "Create Event" && <EventCreation />}
-          {activeItem === "Active Events" && <EventCardList role="vendor" />}
+          {activeItem === "All Events" && (
+            <>
+              <Typography variant="h5" sx={{ fontWeight: "bold", color: "#fff" }}>
+                All Events
+              </Typography>
+              <EventTable
+                events={events}
+                onStart={(id: any) => console.log(`Start event with id: ${id}`)}
+                onUpdate={(id: any) => console.log(`Update event with id: ${id}`)}
+                onDelete={(id: any) => console.log(`Delete event with id: ${id}`)}
+              />
+            </>
+          )}
         </Box>
       </Box>
     </>

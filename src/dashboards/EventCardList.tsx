@@ -16,8 +16,12 @@ interface Event {
 }
 
 interface EventCardListProps {
-  role: "vendor" | "customer"; // Added role prop
+  role: "vendor" | "customer";
+  events: any[];
 }
+
+
+
 
 const EventCardList: React.FC<EventCardListProps> = ({ role }) => {
   const [events, setEvents] = useState<Event[]>([]);

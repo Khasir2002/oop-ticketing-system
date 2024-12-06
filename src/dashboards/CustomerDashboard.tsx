@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Card, CardContent, CardMedia, Grid, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Header from "../common/Header";
 import SnackbarNotification from "../common/SnackBarNotification";
 import axios from "axios";
@@ -10,26 +10,25 @@ const CustomerDashboard: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
   useEffect(() => {
     fetchEvents();
-    const interval = setInterval(fetchEvents, 5000);
+    const interval = setInterval(fetchEvents, 5000); // Polling for new events every 5 seconds
     return () => clearInterval(interval);
   }, []);
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/events/getAllEvents");
-      const startedEvents = response.data.filter((event: { started: any }) => event.started);
-      const eventsWithImages = startedEvents.map((event: any, index: number) => ({
-        ...event,
-      }));
-      setEvents(eventsWithImages);
+      const response = await axios.get("http://localhost:8080/api/v1/events/getAllEvents", {
+        params: { started: true }, // Fetch only started events
+      });
+
+      // Filter events that are started
+      const startedEvents = response.data.filter((event: any) => event.started);
+      setEvents(startedEvents);
     } catch (error) {
       console.error("Failed to fetch events:", error);
     }
@@ -63,7 +62,7 @@ const CustomerDashboard: React.FC = () => {
         <Typography variant="body1" gutterBottom style={{ color: "#9fb3c8", textAlign: "center" }}>
           Browse and purchase tickets for upcoming events.
         </Typography>
-        <EventCardList role="customer" />
+        <EventCardList events={events} role="customer" />
         <SnackbarNotification
           open={snackbarOpen}
           message={snackbarMessage}

@@ -77,9 +77,9 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     if (!validateInputs()) {
       return;
     }
-
+  
     const data = new FormData(event.currentTarget);
-
+  
     try {
       const response = await axios.post('http://localhost:8080/api/v1/auth/login', null, {
         params: {
@@ -87,10 +87,18 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
           password: data.get('password'),
         },
       });
-
+  
       console.log('Login successful:', response.data);
-      localStorage.setItem('user', JSON.stringify(response.data));
-      window.location.href = response.data.role === 'CUSTOMER' ? '/customer-dashboard' : '/vendor-dashboard';
+  
+      // Store userId in localStorage
+      const userData = response.data;
+      localStorage.setItem('userId', userData.id);
+      localStorage.setItem('user', JSON.stringify(userData));
+  
+      // Redirect based on role
+      setTimeout(() => {
+        window.location.href = userData.role === 'CUSTOMER' ? '/customer-dashboard' : '/vendor-dashboard';
+      }, 100);    
     } catch (error) {
       console.error('Login failed:', error);
       setSnackbarMessage('Invalid email or password. Please try again.');
@@ -98,6 +106,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       setSnackbarOpen(true); // Open the Snackbar
     }
   };
+  
 
   const validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;

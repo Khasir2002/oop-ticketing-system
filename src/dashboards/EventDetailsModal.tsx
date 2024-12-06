@@ -122,7 +122,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
             </Typography>
             <Typography variant="body1" sx={{ marginBottom: 2, fontSize: "1rem", color: theme.palette.text.primary }}>
               {event.description}
-            </Typography>            
+            </Typography>
           </Grid>
         </Grid>
 
