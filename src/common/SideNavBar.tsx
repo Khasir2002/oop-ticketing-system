@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Box, Drawer, Typography, Button, Collapse, Snackbar, Alert } from "@mui/material";
+import {
+  Box,
+  Drawer,
+  Typography,
+  Button,
+  Collapse,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,7 +17,7 @@ import {
   Logout,
   DeleteForever,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface MenuItem {
@@ -23,31 +31,32 @@ interface SideNavBarProps {
   onMenuSelect: (menuItem: string) => void;
   activeItem: string;
   username: string | null;
-  onLogout: () => void; 
+  onLogout: () => void;
 }
 
 const SideNavBar: React.FC<SideNavBarProps> = ({
   menuItems,
   onMenuSelect,
   activeItem,
-  username, // Get username here
-  onLogout, // Get logout handler
+  username,
+  onLogout,
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>(() =>
     menuItems.reduce((acc, item) => {
       if (item.name === "Events") {
-        acc[item.name] = true; // Expand "Events" by default
+        acc[item.name] = true;
       }
       return acc;
     }, {} as Record<string, boolean>)
   );
-  
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success'); // Set default severity as success
-  
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error"
+  >("success");
+
+  const navigate = useNavigate();
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
@@ -59,44 +68,38 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
   };
 
   const handleLogout = () => {
-    // Clear user data from localStorage and redirect to sign-in page
     localStorage.removeItem("user");
-    onLogout(); // Invoke the passed logout function if needed
+    onLogout();
     setSnackbarMessage("Logged out successfully.");
     setSnackbarSeverity("success");
-    setSnackbarOpen(true); // Open snackbar for successful logout
+    setSnackbarOpen(true);
     setTimeout(() => {
-      navigate("/sign-in"); // Redirect to sign-in page after showing message
-    }, 2000); // Wait for 2 seconds before redirecting
+      navigate("/sign-in");
+    }, 2000);
+  };
+
+  const handleTicketLogsClick = () => {
+    window.open("/ticket-logs", "_blank"); // Open the TicketLogs component in a new tab
   };
 
   const handleDeactivateAccount = async () => {
     try {
-      // Assuming you have the user ID from localStorage or props
-      const userId = localStorage.getItem("userId");
-      console.log("User ID:", userId);
-  
-      if (!userId) {
-        setSnackbarMessage("User not found!");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-        return;
-      }
-  
-      // Send delete request to the backend
-      const response = await axios.delete(`http://localhost:8080/api/v1/user/deleteUser/${userId}`);
+      const response = await axios.post("/api/deactivate-account", {
+        username,
+      });
       if (response.status === 200) {
         setSnackbarMessage("Account deactivated successfully.");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
-        localStorage.removeItem("user");
         setTimeout(() => {
-          navigate("/sign-in");  // Redirect to login page after successful deactivation
-        }, 2000); // Wait for 2 seconds before redirecting
+          onLogout();
+          navigate("/sign-in");
+        }, 2000);
+      } else {
+        throw new Error("Failed to deactivate account.");
       }
     } catch (error) {
-      console.error("Error deactivating account:", error);
-      setSnackbarMessage("There was an error deactivating your account. Please try again.");
+      setSnackbarMessage("Error deactivating account. Please try again.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     }
@@ -115,9 +118,19 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
         },
       }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center" px={2} py={2}>
+      {/* Header */}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        px={2}
+        py={2}
+      >
         {!isSidebarCollapsed && (
-          <Typography variant="h5" sx={{ fontWeight: "bold", color: "#fff" }}>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: "bold", color: "#fff" }}
+          >
             TicketJet
           </Typography>
         )}
@@ -128,12 +141,15 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
         )}
       </Box>
 
+      {/* Menu Items */}
       <Box mt={2}>
         {menuItems.map((item) => (
           <React.Fragment key={item.name}>
             <Button
               onClick={
-                item.subItems
+                item.name === "Tickets Log"
+                  ? handleTicketLogsClick
+                  : item.subItems
                   ? () => handleSubMenuToggle(item.name)
                   : () => onMenuSelect(item.name)
               }
@@ -161,11 +177,14 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
                     fullWidth
                     sx={{
                       color: "white",
-                      justifyContent: isSidebarCollapsed ? "center" : "flex-start",
+                      justifyContent: isSidebarCollapsed
+                        ? "center"
+                        : "flex-start",
                       textTransform: "none",
                       paddingLeft: isSidebarCollapsed ? 0 : 4,
                       fontWeight: activeItem === subItem.name ? "bold" : "medium",
-                      backgroundColor: activeItem === subItem.name ? "#1e3a8a" : undefined,
+                      backgroundColor:
+                        activeItem === subItem.name ? "#1e3a8a" : undefined,
                     }}
                   >
                     {!isSidebarCollapsed && subItem.name}
@@ -177,7 +196,7 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
         ))}
       </Box>
 
-      {/* Profile Section at the bottom */}
+      {/* Profile Section */}
       <Box
         sx={{
           position: "absolute",
@@ -207,7 +226,7 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
           sx={{
             justifyContent: isSidebarCollapsed ? "center" : "flex-start",
             textTransform: "none",
-            fontWeight: "bold", 
+            fontWeight: "bold",
           }}
         >
           {!isSidebarCollapsed && "Logout"}
@@ -232,9 +251,13 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

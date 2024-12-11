@@ -4,6 +4,7 @@ import SignIn from "./sign-in/SignIn";
 import SignUp from "./sign-up/signUp";
 import CustomerDashboard from "./dashboards/CustomerDashboard";
 import VendorDashboard from "./dashboards/VendorDashboard";
+import TicketLogs from "./dashboards/TerminalLog";
 import AppTheme from "./theme/AppTheme";
 
 const getUser = () => {
@@ -35,7 +36,7 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute role="CUSTOMER">
               <AppTheme>
-              <CustomerDashboard />
+                <CustomerDashboard />
               </AppTheme>
             </ProtectedRoute>
           }
@@ -48,8 +49,16 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-
-        {/* Default Redirect */}
+        <Route
+          path="/ticket-logs"
+          element={
+            <ProtectedRoute role="VENDOR">
+              <AppTheme>
+                <TicketLogs />
+              </AppTheme>
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/sign-in" replace />} />
       </Routes>
     </Router>

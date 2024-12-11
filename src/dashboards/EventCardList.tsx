@@ -20,26 +20,17 @@ interface EventCardListProps {
   events: any[];
 }
 
-
-
-
-const EventCardList: React.FC<EventCardListProps> = ({ role }) => {
-  const [events, setEvents] = useState<Event[]>([]);
+const EventCardList: React.FC<EventCardListProps> = ({ role, events }) => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
 
-  // Fetch events from the API
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/api/v1/events/getAllEvents");
-        setEvents(response.data);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      }
-    };
-
-    fetchEvents();
+    const loggedInUser = localStorage.getItem("user");
+    if (loggedInUser) {
+      const user = JSON.parse(loggedInUser);
+      setUserName(user.name);
+    }
   }, []);
 
   const formatDate = (isoDate: string): string => {
@@ -132,7 +123,9 @@ const EventCardList: React.FC<EventCardListProps> = ({ role }) => {
             description: selectedEvent.description,
             time: selectedEvent.time,
             ticketPrice: selectedEvent.ticketPrice,
+            ticketId: parseInt(selectedEvent.id),
           }}
+          userName={userName}
         />
       )}
     </>
