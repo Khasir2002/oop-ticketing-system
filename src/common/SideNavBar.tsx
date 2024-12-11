@@ -79,7 +79,7 @@ const SideNavBar: React.FC<SideNavBarProps> = ({
   };
 
   const handleTicketLogsClick = () => {
-    window.open("/ticket-logs", "_blank"); // Open the TicketLogs component in a new tab
+    window.open("/ticket-logs", "_blank");
   };
 
   const handleDeactivateAccount = async () => {

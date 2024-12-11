@@ -5,6 +5,7 @@ import SnackbarNotification from "../common/SnackBarNotification";
 import EventCardList from "./EventCardList";
 import Slider from "../common/Slider";
 import axios from "axios";
+import Footer from "../common/Footer";
 
 const CustomerDashboard: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
@@ -45,6 +46,7 @@ const CustomerDashboard: React.FC = () => {
           onClose={handleSnackbarClose}
         />
       </Box>
+      <Footer />
     </Box>
   );
 };

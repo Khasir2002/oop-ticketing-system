@@ -57,6 +57,10 @@ const EventDashboard: React.FC = () => {
     }
 
     fetchEvents();
+    const intervalId = setInterval(fetchEvents,1000);
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   const fetchEvents = async () => {

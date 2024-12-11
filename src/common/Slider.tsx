@@ -1,10 +1,10 @@
-import React from "react";
+import React, { Component } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
-import { Box,Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 interface Slide {
   title: string;
@@ -35,52 +35,54 @@ const slides: Slide[] = [
   }
 ];
 
-const SliderComponent: React.FC = () => {
+class SliderComponent extends Component {
+  render() {
     return (
-        <Box sx={{ position: "relative", width: "100%", height: "400px" }}>
-          <Swiper
-            modules={[Navigation, Pagination, Autoplay]}
-            navigation
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 5000, disableOnInteraction: false }}
-            loop
-            style={{ width: "100%", height: "100%" }}
-          >
-            {slides.map((slide, index) => (
-              <SwiperSlide key={index}>
+      <Box sx={{ position: "relative", width: "100%", height: "400px" }}>
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          navigation
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          loop
+          style={{ width: "100%", height: "100%" }}
+        >
+          {slides.map((slide, index) => (
+            <SwiperSlide key={index}>
+              <Box
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  backgroundImage: `url(${slide.image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
                 <Box
                   sx={{
-                    position: "relative",
-                    width: "100%",
-                    height: "100%",
-                    backgroundImage: `url(${slide.image})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
+                    position: "absolute",
+                    bottom: "20%",
+                    left: "5%",
+                    color: "#fff",
+                    zIndex: 2,
+                    textShadow: "0 2px 5px rgba(0,0,0,0.5)",
                   }}
                 >
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: "20%",
-                      left: "5%",
-                      color: "#fff",
-                      zIndex: 2,
-                      textShadow: "0 2px 5px rgba(0,0,0,0.5)",
-                    }}
-                  >
-                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>
-                      {slide.title}
-                    </Typography>
-                    <Typography variant="body1" sx={{ marginY: 2 }}>
-                      {slide.description}
-                    </Typography>
-                  </Box>
+                  <Typography variant="h3" sx={{ fontWeight: "bold" }}>
+                    {slide.title}
+                  </Typography>
+                  <Typography variant="body1" sx={{ marginY: 2 }}>
+                    {slide.description}
+                  </Typography>
                 </Box>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </Box>
-      );
-    };
+              </Box>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </Box>
+    );
+  }
+}
 
 export default SliderComponent;

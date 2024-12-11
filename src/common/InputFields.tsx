@@ -8,7 +8,7 @@ interface InputFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   icon?: React.ReactNode;
-  error?: string; // Add the error prop
+  error?: string;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -44,8 +44,8 @@ const InputField: React.FC<InputFieldProps> = ({
         "&.Mui-focused fieldset": { borderColor: "#1b998b" },
       },
     }}
-    error={Boolean(error)} // Highlight field if there's an error
-    helperText={error} // Display error message below the field
+    error={Boolean(error)}
+    helperText={error}
   />
 );
 
